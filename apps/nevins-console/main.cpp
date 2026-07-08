@@ -123,6 +123,10 @@ Glyph glyph_for(char raw) {
       return {"11001", "11010", "00010", "00100", "01000", "01011", "10011"};
     case '+':
       return {"00000", "00100", "00100", "11111", "00100", "00100", "00000"};
+    case '=':
+      return {"00000", "00000", "11111", "00000", "11111", "00000", "00000"};
+    case '_':
+      return {"00000", "00000", "00000", "00000", "00000", "00000", "11111"};
     case '(':
       return {"00010", "00100", "01000", "01000", "01000", "00100", "00010"};
     case ')':
@@ -222,6 +226,12 @@ void draw_panel_title(Rect rect, const std::string& title) {
   draw_line(rect.x + 12.0F, rect.y + 34.0F, rect.x + rect.w - 12.0F, rect.y + 34.0F, Color{0.18F, 0.22F, 0.23F});
 }
 
+void draw_status_badge(float x, float y, const std::string& text, Color accent) {
+  fill_rect(Rect{x, y, 10.0F, 10.0F}, accent);
+  fill_rect(Rect{x + 14.0F, y + 4.0F, 42.0F, 2.0F}, Color{0.20F, 0.32F, 0.34F});
+  draw_text(x + 62.0F, y - 2.0F, text, 1.1F, Color{0.66F, 0.76F, 0.72F});
+}
+
 void draw_spectrum(Rect rect, const std::vector<double>& bins) {
   draw_panel(rect, Color{0.055F, 0.070F, 0.075F});
   draw_panel_title(rect, "SPECTRUM VIEW");
@@ -270,30 +280,35 @@ void draw_waterfall(Rect rect, int frame) {
 void draw_card_panel(Rect rect, int confidence) {
   draw_panel(rect, Color{0.075F, 0.082F, 0.085F});
   draw_panel_title(rect, "SIGNAL CARDS");
-  draw_text(rect.x + 14.0F, rect.y + 52.0F, "433.920 MHZ", 2.0F, Color{0.82F, 0.88F, 0.84F});
-  draw_text(rect.x + 14.0F, rect.y + 78.0F, "BURSTY OOK/ASK-LIKE ISM", 1.35F, Color{0.58F, 0.72F, 0.68F});
-  draw_text(rect.x + 14.0F, rect.y + 100.0F, "CONFIDENCE 68%", 1.35F, Color{0.58F, 0.72F, 0.68F});
-  draw_text(rect.x + 14.0F, rect.y + 150.0F, "SAFE: RECORD IQ / REPLAY / EXPLAIN", 1.2F, Color{0.66F, 0.74F, 0.72F});
-  draw_text(rect.x + 14.0F, rect.y + 172.0F, "DO NOT INFER OWNER OR CONTENT", 1.2F, Color{0.78F, 0.62F, 0.52F});
+  draw_text(rect.x + 14.0F, rect.y + 52.0F, "433.920 MHZ", 1.85F, Color{0.82F, 0.88F, 0.84F});
+  draw_text(rect.x + 14.0F, rect.y + 80.0F, "BURSTY OOK/ASK-LIKE ISM", 1.15F, Color{0.58F, 0.72F, 0.68F});
+  draw_text(rect.x + 14.0F, rect.y + 102.0F, "CATEGORY ISM", 1.15F, Color{0.58F, 0.72F, 0.68F});
+  draw_text(rect.x + 14.0F, rect.y + 124.0F, "CONFIDENCE 68%", 1.15F, Color{0.58F, 0.72F, 0.68F});
+
   const float meter = std::clamp(static_cast<float>(confidence) / 100.0F, 0.0F, 1.0F);
-  fill_rect(Rect{rect.x + 0.04F * rect.w, rect.y + 0.58F * rect.h, rect.w * 0.92F, rect.h * 0.08F},
-            Color{0.12F, 0.14F, 0.15F});
-  fill_rect(Rect{rect.x + 0.04F * rect.w, rect.y + 0.58F * rect.h, rect.w * 0.92F * meter, rect.h * 0.08F},
+  const Rect meter_track{rect.x + 14.0F, rect.y + 146.0F, rect.w - 28.0F, 10.0F};
+  fill_rect(meter_track, Color{0.12F, 0.14F, 0.15F});
+  fill_rect(Rect{meter_track.x, meter_track.y, meter_track.w * meter, meter_track.h},
             Color{0.20F, 0.67F, 0.54F});
-  draw_line(rect.x + 0.04F * rect.w, rect.y + 0.34F * rect.h, rect.x + 0.96F * rect.w, rect.y + 0.34F * rect.h,
-            Color{0.30F, 0.34F, 0.35F});
+
+  draw_line(rect.x + 14.0F, rect.y + 174.0F, rect.x + rect.w - 14.0F, rect.y + 174.0F, Color{0.30F, 0.34F, 0.35F});
+  draw_text(rect.x + 14.0F, rect.y + 190.0F, "SAFE NEXT", 1.1F, Color{0.70F, 0.78F, 0.76F});
+  draw_text(rect.x + 14.0F, rect.y + 212.0F, "RECORD IQ / REPLAY LOCALLY", 1.05F, Color{0.66F, 0.74F, 0.72F});
+
+  const Rect caution{rect.x + 14.0F, rect.y + rect.h - 58.0F, rect.w - 28.0F, 38.0F};
+  fill_rect(caution, Color{0.095F, 0.105F, 0.105F});
+  line_rect(caution, Color{0.26F, 0.19F, 0.16F});
+  draw_text(caution.x + 10.0F, caution.y + 10.0F, "DO NOT INFER OWNER OR CONTENT", 1.0F, Color{0.78F, 0.62F, 0.52F});
 }
 
 void draw_status_panel(Rect rect, int frame) {
   draw_panel(rect, Color{0.070F, 0.078F, 0.080F});
   draw_panel_title(rect, "DEVICE STATUS");
-  draw_text(rect.x + 14.0F, rect.y + 52.0F, "MOCK RTL-SDR SOURCE", 1.35F, Color{0.62F, 0.74F, 0.72F});
-  draw_text(rect.x + 14.0F, rect.y + 76.0F, "RECEIVE-ONLY OK", 1.35F, Color{0.56F, 0.82F, 0.62F});
+  draw_text(rect.x + 14.0F, rect.y + 50.0F, "MOCK RTL-SDR SOURCE", 1.15F, Color{0.62F, 0.74F, 0.72F});
+  draw_text(rect.x + 14.0F, rect.y + 72.0F, "CENTER 433.920 MHZ", 1.15F, Color{0.62F, 0.74F, 0.72F});
+  draw_text(rect.x + 14.0F, rect.y + 94.0F, "SAMPLE 2048000 HZ", 1.15F, Color{0.62F, 0.74F, 0.72F});
   const float pulse = 0.35F + 0.25F * std::sin(static_cast<float>(frame) * 0.08F);
-  fill_rect(Rect{rect.x + 0.04F * rect.w, rect.y + 0.34F * rect.h, rect.w * 0.14F, rect.h * 0.32F},
-            Color{0.10F, 0.56F + pulse, 0.28F});
-  fill_rect(Rect{rect.x + 0.23F * rect.w, rect.y + 0.40F * rect.h, rect.w * 0.68F, rect.h * 0.10F},
-            Color{0.18F, 0.28F, 0.31F});
+  draw_status_badge(rect.x + rect.w - 132.0F, rect.y + 48.0F, "RX OK", Color{0.10F, 0.56F + pulse, 0.28F});
 }
 
 void render_dashboard(int width, int height, int frame) {
