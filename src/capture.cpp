@@ -165,8 +165,8 @@ void write_capture_pack(const std::filesystem::path& output_path,
   spectrum_csv << "burst_like," << (spectrum.burst_like ? 1 : 0) << '\n';
   write_text_file(output_path / manifest.spectrum_file, spectrum_csv.str());
 
-  write_text_file(output_path / manifest.notes_file,
-                  "Mock capture pack. Receive-only signal-shape analysis; no content decoding attempted.\n");
+  const std::string source_note = manifest.name == "rtlsdr-survey" ? "RTL-SDR capture pack." : "Mock capture pack.";
+  write_text_file(output_path / manifest.notes_file, source_note + " Signal-shape analysis summary.\n");
 }
 
 CapturePack create_mock_capture(const std::filesystem::path& output_path,
@@ -192,6 +192,37 @@ CapturePack create_mock_capture(const std::filesystem::path& output_path,
 
   auto card = classify_signal(observation);
   auto manifest = make_manifest(settings, card, "mock-survey");
+  write_capture_pack(output_path, manifest, iq, card, spectrum);
+  return CapturePack{output_path, manifest, std::move(iq), std::move(card)};
+}
+
+CapturePack create_rtlsdr_capture(const std::filesystem::path& output_path,
+                                  std::uint32_t duration_seconds,
+                                  std::uint64_t center_frequency_hz,
+                                  std::uint32_t sample_rate_hz,
+                                  std::int32_t gain_db_tenths) {
+  if (duration_seconds == 0U || duration_seconds > 3600U) {
+    throw std::invalid_argument("RTL-SDR survey duration must be between 1 and 3600 seconds");
+  }
+
+  CaptureSettings settings;
+  settings.center_frequency_hz = center_frequency_hz;
+  settings.sample_rate_hz = sample_rate_hz;
+  settings.duration_ms = duration_seconds * 1000U;
+  settings.gain_db_tenths = gain_db_tenths;
+
+  RtlSdrSource source;
+  auto iq = source.read_iq(settings);
+  auto spectrum = analyze_iq_power(iq, settings);
+
+  SignalObservation observation;
+  observation.center_frequency_hz = settings.center_frequency_hz;
+  observation.sample_rate_hz = settings.sample_rate_hz;
+  observation.duration_ms = settings.duration_ms;
+  observation.spectrum = spectrum;
+
+  auto card = classify_signal(observation);
+  auto manifest = make_manifest(settings, card, "rtlsdr-survey");
   write_capture_pack(output_path, manifest, iq, card, spectrum);
   return CapturePack{output_path, manifest, std::move(iq), std::move(card)};
 }

@@ -16,7 +16,7 @@ Current impact:
 
 - F* verification runs. KaRaMeL extraction remains a project wiring task and does not generate C in this pass.
 - `nevins-console` now builds as a native GLFW/OpenGL mock dashboard and has a terminal fallback for headless sessions.
-- The current Codex execution session does not expose a usable display, so the OpenGL smoke run falls back to terminal rendering here.
-- Real RTL-SDR mode compiles and links when `NEVINS_ENABLE_RTLSDR=ON`, but real capture remains scaffolded and is not required for tests.
+- The OpenGL console smoke run succeeds in the current desktop session.
+- Real RTL-SDR mode compiles and links when `NEVINS_ENABLE_RTLSDR=ON`. Receive-only hardware capture has been smoke-tested with an RTL-SDR Blog V4 device.
 
 No web app or alternate-language dashboard has been added.

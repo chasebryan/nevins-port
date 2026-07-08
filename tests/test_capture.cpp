@@ -1,11 +1,13 @@
 #include "nevins/capture.h"
 
 #include <cassert>
+#include <chrono>
 #include <filesystem>
 #include <string>
 
 int main() {
-  const auto path = std::filesystem::temp_directory_path() / "nevins_test_capture.nvcap";
+  const auto suffix = std::to_string(std::chrono::steady_clock::now().time_since_epoch().count());
+  const auto path = std::filesystem::temp_directory_path() / ("nevins_test_capture_" + suffix + ".nvcap");
   std::filesystem::remove_all(path);
 
   const auto pack = nevins::create_mock_capture(path, 1U);
@@ -27,7 +29,7 @@ int main() {
 
   const auto explanation = nevins::explain_capture_pack(path);
   assert(explanation.find("SIGNAL CARD") != std::string::npos);
-  assert(explanation.find("No content decoding attempted") != std::string::npos);
+  assert(explanation.find("Routing: shape-only analysis route") != std::string::npos);
 
   const auto replay = nevins::replay_capture_pack(path);
   assert(replay.find("REPLAY") != std::string::npos);

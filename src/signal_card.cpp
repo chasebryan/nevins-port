@@ -21,11 +21,11 @@ SignalCard base_card(const SignalObservation& observation) {
   card.power_estimate_db = observation.spectrum.peak_power_db;
   card.noise_floor_db = observation.spectrum.noise_floor_db;
   card.duration_ms = observation.duration_ms;
-  card.why.push_back("No content decoding attempted");
+  card.why.push_back("Shape, power, timing, and frequency range are the only inputs");
   card.safe_next_steps.push_back("Save IQ capture");
   card.safe_next_steps.push_back("Replay capture locally");
-  card.do_not_assume.push_back("Do not infer device owner or private content");
-  card.policy = "receive-only analysis; content decoding not attempted";
+  card.do_not_assume.push_back("Do not infer identity or message from signal shape alone");
+  card.policy = "shape-only analysis route";
   return card;
 }
 
@@ -108,9 +108,9 @@ SignalCard classify_signal(const SignalObservation& observation) {
     card.why.insert(card.why.begin() + 1, "The system cannot safely classify this as public content");
     card.safe_next_steps.clear();
     card.safe_next_steps.push_back("Keep analysis to signal shape and metadata");
-    card.safe_next_steps.push_back("Do not route to content decoding");
+    card.safe_next_steps.push_back("Record or replay IQ for measurement comparison");
     card.do_not_assume.push_back("Do not claim message content, device identity, or user identity");
-    card.policy = "restricted/private possible; explain-only receive analysis";
+    card.policy = "shape-only analysis route";
   } else {
     card.modulation = ModulationClass::Unknown;
     card.type_guess = "Unknown narrowband signal";
@@ -121,13 +121,13 @@ SignalCard classify_signal(const SignalObservation& observation) {
     card.safe_next_steps.clear();
     card.safe_next_steps.push_back("Record IQ only if lawful in your location");
     card.safe_next_steps.push_back("Replay locally for signal-shape comparison");
-    card.safe_next_steps.push_back("Do not route to content decoding");
-    card.policy = "unknown signal; conservative receive-only explanation";
+    card.safe_next_steps.push_back("Compare frequency and bandwidth against public references");
+    card.policy = "unknown signal route";
   }
 
   card.confidence = std::clamp(card.confidence, 0, 100);
   if (!nv_policy_allows_action(card.category, NV_ACTION_DECODE_CONTENT)) {
-    card.policy += "; decoding is not allowed by policy";
+    card.policy += "; decode route unavailable";
   }
   return card;
 }
@@ -201,7 +201,7 @@ std::string format_signal_card(const SignalCard& card) {
   }
 
   output << "\nCategory: " << category_display(card.category) << '\n';
-  output << "Policy: " << card.policy << '\n';
+  output << "Routing: " << card.policy << '\n';
   return output.str();
 }
 

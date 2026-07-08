@@ -16,12 +16,13 @@ int main() {
   const auto rendered = nevins::format_signal_card(ism_card);
   assert(rendered.find("Frequency: 433.920 MHz") != std::string::npos);
   assert(rendered.find("Bursty OOK/ASK-like ISM signal") != std::string::npos);
-  assert(rendered.find("Do not infer device owner or private content") != std::string::npos);
+  assert(rendered.find("Do not infer identity or message from signal shape alone") != std::string::npos);
+  assert(rendered.find("Routing: shape-only analysis route") != std::string::npos);
 
   const auto restricted_card = nevins::identify_frequency(800000000U, 1000U);
   assert(restricted_card.category == NV_SIGNAL_RESTRICTED_PRIVATE);
   assert(!nv_policy_allows_action(restricted_card.category, NV_ACTION_DECODE_CONTENT));
-  assert(restricted_card.policy.find("explain-only") != std::string::npos);
+  assert(restricted_card.policy.find("decode route unavailable") != std::string::npos);
 
   return 0;
 }

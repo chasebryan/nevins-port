@@ -48,6 +48,41 @@ If `fstar.exe` or `krml` is unavailable, it fails with the required message and 
 ./build/apps/nevins/nevins replay build/demo.nvcap
 ```
 
+## RTL-SDR Hardware Mode
+
+Real RTL-SDR mode is explicit and receive-only:
+
+```sh
+cmake -S . -B build-rtlsdr -G Ninja -DNEVINS_BUILD_TESTS=ON -DNEVINS_BUILD_GUI=ON -DNEVINS_ENABLE_RTLSDR=ON
+cmake --build build-rtlsdr
+./build-rtlsdr/apps/nevins/nevins probe --rtlsdr
+./build-rtlsdr/apps/nevins/nevins survey --rtlsdr --freq 433920000 --duration 5 --out build/rtl.nvcap
+./build-rtlsdr/apps/nevins/nevins explain build/rtl.nvcap
+./build-rtlsdr/apps/nevins/nevins replay build/rtl.nvcap
+```
+
+The native console can also use the RTL-SDR directly:
+
+```sh
+./build-rtlsdr/apps/nevins-console/nevins-console --rtlsdr --freq 433920000
+```
+
+For headless sessions, use:
+
+```sh
+./build-rtlsdr/apps/nevins-console/nevins-console --rtlsdr --freq 433920000 --text
+```
+
+Optional survey flags:
+
+```sh
+--rate 2048000
+--gain-db 0
+--window-ms 250
+```
+
+`--gain-db 0` uses automatic tuner gain. Positive values request manual gain in dB and are rounded to the nearest supported tuner gain.
+
 The dashboard binary runs against deterministic mock data:
 
 ```sh
@@ -56,12 +91,12 @@ The dashboard binary runs against deterministic mock data:
 
 ## Current Status
 
-This first implementation pass provides the repository scaffold, native C++ CLI, GLFW/OpenGL mock dashboard with terminal fallback, mock SDR source, capture pack writer/reader, signal-card generation, conservative policy checks, F* specification modules, C++ tests, shell guards, and CI wiring. RTL-SDR hardware mode compiles behind `NEVINS_ENABLE_RTLSDR` and is not required for CI.
+This first implementation pass provides the repository scaffold, native C++ CLI, GLFW/OpenGL mock dashboard with terminal fallback, mock SDR source, receive-only RTL-SDR capture path, capture pack writer/reader, signal-card generation, conservative routing checks, F* specification modules, C++ tests, shell guards, and CI wiring. RTL-SDR hardware mode compiles behind `NEVINS_ENABLE_RTLSDR` and is not required for CI.
 
 ## Roadmap
 
 1. Wire F*/KaRaMeL extraction into `generated/` and replace the temporary C++ mirror bridge with generated C-facing verified logic.
-2. Add real librtlsdr capture behind explicit runtime selection.
+2. Add more device controls for lawful receive-only RTL-SDR operation.
 3. Expand native dashboard rendering with Dear ImGui and ImPlot panels on top of the current GLFW/OpenGL mock dashboard.
-4. Add richer DSP summaries while preserving conservative classification and receive-only policy boundaries.
+4. Add richer DSP summaries while preserving conservative classification and receive-only routing boundaries.
 5. Add capture search, comparison, and notebook workflows.

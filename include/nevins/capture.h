@@ -42,6 +42,11 @@ void write_capture_pack(const std::filesystem::path& output_path,
 CapturePack create_mock_capture(const std::filesystem::path& output_path,
                                 std::uint32_t duration_seconds,
                                 std::uint64_t center_frequency_hz = 433920000);
+CapturePack create_rtlsdr_capture(const std::filesystem::path& output_path,
+                                  std::uint32_t duration_seconds,
+                                  std::uint64_t center_frequency_hz = 433920000,
+                                  std::uint32_t sample_rate_hz = 2048000,
+                                  std::int32_t gain_db_tenths = 0);
 
 CaptureManifest read_manifest(const std::filesystem::path& capture_path);
 CapturePack load_capture_pack(const std::filesystem::path& capture_path);

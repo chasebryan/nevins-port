@@ -8,7 +8,7 @@ The `nevins` CLI is the operational shell for probing devices, running mock surv
 
 ## Native Dashboard
 
-The `nevins-console` dashboard is a native C++ binary. This first pass renders deterministic mock device, spectrum, waterfall, signal-card, capture-library, policy, and event-log panes through GLFW/OpenGL without web technologies. It includes a small built-in bitmap text renderer for pane labels and status values, plus a terminal fallback for headless sessions. Dear ImGui and ImPlot remain planned for richer controls.
+The `nevins-console` dashboard is a native C++ binary. This first pass renders deterministic mock or explicit RTL-SDR-backed device, spectrum, waterfall, signal-card, capture-library, receiver-metrics, and event-log panes through GLFW/OpenGL without web technologies. It includes a small built-in bitmap text renderer for pane labels and status values, plus a terminal fallback for headless sessions. Dear ImGui and ImPlot remain planned for richer controls.
 
 ## F* Verified Core
 
@@ -27,7 +27,7 @@ F* modules under `core/fstar/` are the source-of-truth specifications. Future ex
 
 ## RTL-SDR Device Adapter
 
-The real device adapter is isolated behind `NEVINS_ENABLE_RTLSDR` and a runtime mode decision. It will use librtlsdr directly from C++ and will remain receive-only.
+The real device adapter is isolated behind `NEVINS_ENABLE_RTLSDR` and the explicit `--rtlsdr` runtime mode. It uses librtlsdr directly from C++ for receive-only synchronous IQ reads. The adapter sets center frequency, sample rate, optional tuner gain, resets the device buffer, and reads a finite duration into unsigned 8-bit interleaved IQ samples.
 
 ## Mock SDR Adapter
 
@@ -50,7 +50,7 @@ Replay loads the manifest and IQ file, validates the basic metadata, and regener
 
 ## Signal Card Pipeline
 
-Signal observations are converted into plain-English signal cards that include frequency, bandwidth estimate, SNR or power estimate, analysis window, modulation-class guess, confidence, reasons, safe next steps, non-assumptions, category, and policy status.
+Signal observations are converted into plain-English signal cards that include frequency, bandwidth estimate, SNR or power estimate, analysis window, modulation-class guess, confidence, reasons, safe next steps, non-assumptions, category, and routing status.
 
 ## Safety/Policy Classifier
 

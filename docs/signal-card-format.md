@@ -14,7 +14,7 @@ Required fields:
 - What is safe to try next
 - What not to assume
 - Category: public, amateur, weather, satellite, ISM, aviation-public, unknown, or restricted/private
-- Policy status
+- Routing status
 
 Example:
 
@@ -30,17 +30,20 @@ Why:
 * Short repeated burst pattern
 * Narrow occupied bandwidth
 * Common ISM-band frequency range
-* No content decoding attempted
+* Shape, power, timing, and frequency range are the only inputs
 
 Safe next step:
 
 * Save IQ capture
 * Replay capture locally
 * Compare timing profile against known public examples
-* Do not infer device owner or private content
+
+What not to assume:
+
+* Do not infer identity or message from signal shape alone
 
 Category: ISM
-Policy: receive-only analysis; content decoding not attempted
+Routing: shape-only analysis route
 ```
 
 Signal cards must avoid overclaiming. They describe observable signal properties and conservative classes, not private identities or message content.
